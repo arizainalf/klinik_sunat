@@ -172,7 +172,7 @@ if (!$data) {
                                         <option value="" disabled selected>-- Pilih Pasien --</option>
                                         <?php
                                             $q_pasien = $koneksi->query("
-                                                SELECT a.*, b.nm_pasien, p.nm_paket, p.hrg_min, p.hrg_max 
+                                                SELECT a.*, b.nm_pasien, p.nm_paket, p.hrg_min, p.hrg_max, a.id_pendaftaran
                                                 FROM tb_pendaftaran a 
                                                 JOIN tb_pasien b ON a.id_pasien = b.id_pasien 
                                                 JOIN tb_paket p ON a.id_paket = p.id_paket 
@@ -203,6 +203,7 @@ if (!$data) {
                                         <span class="input-group-text bg-light">Rp</span>
                                         <input type="text" class="form-control" id="view_hrg_paket" autocomplete="off"
                                             required>
+                                        <input type="hidden" name="id_paket" id="id_paket">
                                     </div>
                                     <input type="hidden" name="hrg_paket" id="real_hrg_paket">
                                     <small id="infoRange" class="text-muted fst-italic"></small>
@@ -234,7 +235,7 @@ if (!$data) {
                                         aria-label="Close"></button>
                                     <div class="col-md-6 mb-2">
                                         <label class="form-label small">Nama Tindakan</label>
-                                        <select class="form-select select-tindakan" name="id_tindakan[]" required>
+                                        <select class="form-select select-tindakan" name="id_tindakan[]">
                                             <option value="" disabled selected>-- Pilih --</option>
                                             <?php
                                                 $q_tindakan = $koneksi->query("SELECT * FROM tb_tindakan_tambahan");
@@ -295,7 +296,9 @@ if (!$data) {
             const data = dataPasien[id];
 
             if (data) {
+                console.log(data);
                 $('#view_nm_paket').val(data.nm_paket);
+                $('#id_paket').val(data.id_paket);
                 $('#view_tgl_daftar').val(data.tgl_pendaftaran);
 
                 const min = parseInt(data.hrg_min);

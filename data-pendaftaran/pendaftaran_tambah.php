@@ -14,7 +14,7 @@ if (isset($_POST['save'])) {
     $id_pasien      = $_POST['id_pasien'];
     $id_paket       = $_POST['id_paket'];
     $tgl_pendaftaran= $_POST['tgl_pendaftaran'];
-    $status         = 0; // Default: Belum diperiksa
+    $status         = "0"; // Default: Belum diperiksa
 
     // Validasi input
     if (empty($id_pasien) || empty($id_paket)) {
@@ -22,7 +22,7 @@ if (isset($_POST['save'])) {
     } else {
         // Prepared Statement Insert
         $stmt = $koneksi->prepare("INSERT INTO tb_pendaftaran (kd_pendaftaran, id_pasien, id_paket, tgl_pendaftaran, status) VALUES (?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssisi", $kd_pendaftaran, $id_pasien, $id_paket, $tgl_pendaftaran, $status);
+        $stmt->bind_param("ssiss", $kd_pendaftaran, $id_pasien, $id_paket, $tgl_pendaftaran, $status);
 
         if ($stmt->execute()) {
             echo "<script>

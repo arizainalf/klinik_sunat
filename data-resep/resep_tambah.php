@@ -292,7 +292,7 @@ if (!$data) {
 
                                     <div class="col-md-4 mb-2">
                                         <label class="form-label small">Nama Obat</label>
-                                        <select class="form-select select-obat" name="id_obat[]" required>
+                                        <select class="form-select select-obat" name="id_obat[]">
                                             <option value="" disabled selected>-- Pilih --</option>
                                             <?php
                                                 $q_obat = $koneksi->query("SELECT * FROM tb_obat WHERE stok > 0");
@@ -310,7 +310,7 @@ if (!$data) {
                                     <div class="col-md-2 mb-2">
                                         <label class="form-label small">Qty</label>
                                         <input type="number" class="form-control input-qty" name="jumlah_obat[]" min="1"
-                                            required placeholder="0">
+                                            placeholder="0">
                                     </div>
                                     <div class="col-md-3 mb-2">
                                         <label class="form-label small">Subtotal</label>

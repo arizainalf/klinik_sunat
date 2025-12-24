@@ -12,6 +12,7 @@ if (isset($_POST['save'])) {
     $kd_pemeriksaan = $_POST['kd_pemeriksaan'];
     $id_pendaftaran = $_POST['id_pendaftaran'];
     $hrg_paket      = (int) $_POST['hrg_paket'];
+    $id_paket       = (int) $_POST['id_paket'];
     $tgl            = $_POST['tgl_pemeriksaan'];
 
     $id_tindakan  = $_POST['id_tindakan'];  // ARRAY
@@ -24,14 +25,15 @@ if (isset($_POST['save'])) {
         // 1️⃣ Insert pemeriksaan
         $stmt = mysqli_prepare($koneksi, "
             INSERT INTO tb_pemeriksaan
-            (kd_pemeriksaan, id_pendaftaran, hrg_paket, tgl_pemeriksaan)
-            VALUES (?, ?, ?, ?)
+            (kd_pemeriksaan, id_pendaftaran, hrg_paket, tgl_pemeriksaan, id_paket)
+            VALUES (?, ?, ?, ?, ?)
         ");
-        mysqli_stmt_bind_param($stmt, "siis",
+        mysqli_stmt_bind_param($stmt, "siisi",
             $kd_pemeriksaan,
             $id_pendaftaran,
             $hrg_paket,
-            $tgl
+            $tgl,
+            $id_paket
         );
         mysqli_stmt_execute($stmt);
 

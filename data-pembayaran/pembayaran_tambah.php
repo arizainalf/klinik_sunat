@@ -354,6 +354,8 @@ if (!$data) {
     const resepMap = <?php echo json_encode($js_array); ?>;
 
     function dataResep(id) {
+        console.log(resepMap, id);
+
         // Tampilkan Loading
         $('#emptyState').addClass('d-none');
         $('#invoiceContent').addClass('d-none');
@@ -371,9 +373,10 @@ if (!$data) {
             $('#kembalian').val('0');
 
             // AJAX Fetch Detail
-            fetch('ajax_get_obat.php?kd_pemeriksaan=' + resepMap[id].kd_pemeriksaan)
+            fetch('ajax_get_obat.php?id_pemeriksaan=' + resepMap[id].id_pemeriksaan)
                 .then(res => res.json())
                 .then(res => {
+                    console.log(res);
                     // Hilangkan Loading
                     $('#loading').addClass('d-none');
                     $('#invoiceContent').removeClass('d-none');

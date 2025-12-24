@@ -1,84 +1,107 @@
 <?php
 include '../koneksi.php';
+header('Content-Type: application/json');
 
-if (!isset($_GET['kd_pemeriksaan'])) {
-    echo json_encode([]);
+// ===============================
+// 1. VALIDASI PARAMETER
+// ===============================
+if (!isset($_GET['id_pemeriksaan'])) {
+    echo json_encode([
+        'status' => false,
+        'message' => 'id_pemeriksaan tidak dikirim'
+    ]);
     exit;
 }
 
-$kd = $koneksi->real_escape_string($_GET['kd_pemeriksaan']);
+$id_pemeriksaan = (int) $_GET['id_pemeriksaan'];
 
-/* ===============================
-   1. HEADER + TINDAKAN
-================================ */
-$q = $koneksi->query("
-    SELECT
+
+// ===============================
+// 2. HEADER PEMERIKSAAN
+// ===============================
+$qHeader = $koneksi->query("
+    SELECT 
         p.id_pemeriksaan,
         p.kd_pemeriksaan,
         pk.nm_paket,
-        p.hrg_paket,
-        dp.id_tindakan,
-        dp.hrg_tindakan,
-        t.nm_tindakan
+        p.hrg_paket
     FROM tb_pemeriksaan p
-    JOIN tb_paket pk ON p.id_paket = pk.id_paket
-    LEFT JOIN tb_detail_pemeriksaan dp 
-        ON p.id_pemeriksaan = dp.id_pemeriksaan
-    LEFT JOIN tb_tindakan_tambahan t ON dp.id_tindakan = t.id_tindakan
-    WHERE p.kd_pemeriksaan = '$kd'
+    JOIN tb_paket pk 
+        ON p.id_paket = pk.id_paket
+    WHERE p.id_pemeriksaan = $id_pemeriksaan
 ");
 
-$header   = null;
-$tindakan = [];
-$id_pemeriksaan = null;
+$header = $qHeader->fetch_assoc();
 
-while ($r = $q->fetch_assoc()) {
-    if ($header === null) {
-        $header = [
-            'nm_paket'  => $r['nm_paket'],
-            'hrg_paket' => $r['hrg_paket'],
-        ];
-        $id_pemeriksaan = $r['id_pemeriksaan'];
-    }
-
-    if ($r['id_tindakan']) {
-        $tindakan[] = [
-            'id_tindakan'  => $r['id_tindakan'],
-            'nm_tindakan'  => $r['nm_tindakan'],
-            'hrg_tindakan' => $r['hrg_tindakan'],
-        ];
-    }
+if (!$header) {
+    echo json_encode([
+        'status' => false,
+        'message' => 'Data pemeriksaan tidak ditemukan'
+    ]);
+    exit;
 }
 
-/* ===============================
-   2. OBAT (INI YANG KAMU TANYA)
-   DISIMPAN KE VARIABEL $obat
-================================ */
+
+// ===============================
+// 3. TINDAKAN TAMBAHAN
+// ===============================
+$tindakan = [];
+
+$qTindakan = $koneksi->query("
+    SELECT 
+        dp.id_tindakan,
+        t.nm_tindakan,
+        dp.hrg_tindakan
+    FROM tb_detail_pemeriksaan dp
+    JOIN tb_tindakan_tambahan t 
+        ON dp.id_tindakan = t.id_tindakan
+    WHERE dp.id_pemeriksaan = $id_pemeriksaan
+");
+
+while ($row = $qTindakan->fetch_assoc()) {
+    $tindakan[] = [
+        'id_tindakan'  => $row['id_tindakan'],
+        'nm_tindakan'  => $row['nm_tindakan'],
+        'hrg_tindakan' => (int)$row['hrg_tindakan']
+    ];
+}
+
+
+// ===============================
+// 4. OBAT / RESEP
+// ===============================
 $obat = [];
 
-if ($id_pemeriksaan) {
-    $qo = $koneksi->query("
-        SELECT 
-            o.nm_obat,
-            o.harga_obat,
-            dr.jumlah_obat,
-            dr.subharga_obat
-        FROM tb_resep r
-        JOIN tb_detail_resep dr ON r.id_resep = dr.id_resep
-        JOIN tb_obat o ON dr.id_obat = o.id_obat
-        WHERE r.id_pemeriksaan = '$id_pemeriksaan'
-    ");
+$qObat = $koneksi->query("
+    SELECT 
+        o.nm_obat,
+        o.harga_obat,
+        dr.jumlah_obat,
+        dr.subharga_obat
+    FROM tb_resep r
+    JOIN tb_detail_resep dr 
+        ON r.id_resep = dr.id_resep
+    JOIN tb_obat o 
+        ON dr.id_obat = o.id_obat
+    WHERE r.id_pemeriksaan = $id_pemeriksaan
+");
 
-    while ($o = $qo->fetch_assoc()) {
-        $obat[] = $o;
-    }
+while ($row = $qObat->fetch_assoc()) {
+    $obat[] = [
+        'nm_obat'        => $row['nm_obat'],
+        'harga_obat'     => (int)$row['harga_obat'],
+        'jumlah_obat'    => (int)$row['jumlah_obat'],
+        'subharga_obat'  => (int)$row['subharga_obat']
+    ];
 }
 
-/* ===============================
-   3. RESPONSE JSON
-================================ */
+
+// ===============================
+// 5. RESPONSE JSON
+// ===============================
 echo json_encode([
+    'status'   => true,
     'header'   => $header,
     'tindakan' => $tindakan,
-    'obat'     => $obat   // 👈 OBAT DISIMPAN DI SINI
+    'obat'     => $obat
 ]);
